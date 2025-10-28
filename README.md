@@ -1,8 +1,10 @@
 Для сборки приложения в Dockerfile необходимо использовать образ golang:1.24.9
 
 Скрипт сборки приложения:
+```console
 $ go mod download && go mod verify
 $ CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -x -v -o <file_path> main.go
+```
 , где <file_path> - путь куда необходимо положить исполняемый файл приложения
 
 Для корректной работы приложения необходимо внутри docker контейнера насположить директорию ui из репозитория рядом с приложением.
