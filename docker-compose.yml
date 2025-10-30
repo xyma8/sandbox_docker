@@ -1,15 +1,14 @@
-version: '3'
 services:
   db:
-    image: postgres:latest
+    image: postgres:16-alpine
     volumes:
-      - db_data:/var/lib/postgresql
+      - db_data:/var/lib/postgresql/data
     restart: always
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: sandboxdb
-      POSTGRES_PORT: 5432
+      POSTGRES_USER: ${POSTGRES_USER:? set in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: ${POSTGRES_DB:?}
+      POSTGRES_PORT: ${DB_PORT:?}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U root -d sandboxdb -h 127.0.0.1"]
       interval: 5s
@@ -23,9 +22,9 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "8080:8080"
+      - "${APP_PORT:-8080}:8080"
     environment:
-      DB: postgresql://root:admin@db:5432/sandboxdb?sslmode=disable
+      DB: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST:?}:${DB_PORT}/${POSTGRES_DB}?sslmode=disable
 
 volumes:
   db_data: 
