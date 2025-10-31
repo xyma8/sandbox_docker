@@ -10,21 +10,31 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:?}
       POSTGRES_PORT: ${DB_PORT:?}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U root -d sandboxdb -h 127.0.0.1"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 20
-      start_period: 20s
+      start_period: 10s
 
   myapp:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: myapp:1.0.0
     depends_on:
       db:
         condition: service_healthy
+        restart: true
     ports:
-      - "${APP_PORT:-8080}:8080"
+      - "${MYAPP_PORT:-8080}:8080"
     environment:
       DB: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${DB_HOST:?}:${DB_PORT}/${POSTGRES_DB}?sslmode=disable
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/healthcheck || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 volumes:
   db_data: 

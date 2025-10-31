@@ -7,7 +7,7 @@ RUN go mod download && go mod verify
 COPY main.go ./
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -x -v -o /out/myapp main.go
 
-FROM alpine:latest
+FROM alpine:3.22
 WORKDIR /app
 COPY --from=builder /out/myapp ./myapp
 COPY ui/ ./ui/
